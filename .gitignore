@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+__pycache__/
+*.tar.gz
+node_modules
+work/
+lecture-work/

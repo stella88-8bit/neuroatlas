@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const data=JSON.parse(fs.readFileSync(new URL('./dist/data.json',import.meta.url)));
+const groups=['foundations','computation','systems'].map(name=>JSON.parse(fs.readFileSync(new URL(`./dist/lectures-${name}.json`,import.meta.url))));
+const lectures=Object.assign({},...groups),ids=new Set(data.nodes.map(n=>n.id));
+assert.equal(groups.reduce((n,g)=>n+Object.keys(g).length,0),116,'Duplicates or missing lectures');assert.equal(Object.keys(lectures).length,116);
+let min=Infinity,max=0,words=0,questions=0;const sources=new Set();
+for(const node of data.nodes){const l=lectures[node.id];assert(l,node.id);assert(l.summary.length>60,node.id);assert(l.minutes>=10&&l.minutes<=120);assert(l.studyHours>=1&&l.studyHours<=8);assert(l.objectives.length>=3);assert(l.sections.length>=3);for(const section of l.sections){assert(section.title);assert(section.paragraphs.length>=1);assert(section.paragraphs.join(' ').length>150,`${node.id}: insufficient section`);}assert(l.workedExample.steps.length>=3,node.id);assert(l.workedExample.result.length>20);assert(l.misconceptions.length>=1);assert(l.exercise.prompt.length>30);assert(l.exercise.solution.length>60);assert(l.quiz.length>=2);for(const q of l.quiz){assert(q.options.length>=3);assert(Number.isInteger(q.answer)&&q.answer>=0&&q.answer<q.options.length);assert(q.explanation.length>25);questions++;}assert(l.sources.length>=1);for(const source of l.sources){assert.equal(new URL(source.url).protocol,'https:');sources.add(source.url);}const count=JSON.stringify(l).split(/\s+/).length;assert(count>=350,`${node.id}: only ${count} words`);min=Math.min(min,count);max=Math.max(max,count);words+=count;}
+for(const id of Object.keys(lectures))assert(ids.has(id));
+console.log(`PASS: ${ids.size} individual lectures, ${words.toLocaleString('en')} whitespace-delimited words (${min}–${max} per module), ${questions} questions with explanations, worked examples and exercises in every module, ${sources.size} unique primary-source links. Structural checks do not certify scientific accuracy.`);

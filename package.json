@@ -1,0 +1,17 @@
+{
+  "name": "neuroatlas",
+  "version": "10.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Russian-language neurocybernetics atlas with 116 lectures, 3D dependencies and study planning",
+  "scripts": {
+    "test": "node check.mjs && node check-map.mjs && node check-labels.mjs && node check-immersion.mjs && node check-surfaces.mjs && node check-planner.mjs && node check-academy.mjs && node check-app.mjs && node check-motion.mjs && node check-signal.mjs && node check-lectures.mjs",
+    "start": "python3 start.py"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.3"
+  },
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  }
+}

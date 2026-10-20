@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru" data-motion="full">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f6ef"><meta name="description" content="NEUROATLAS — подробная карта изучения нейрокибернетики и интерфейсов мозг–компьютер. 116 лекций, 3D-карта, примеры, самопроверка и персональное учебное расписание.">
+  <title>NEUROATLAS — от нейрона к интерфейсу</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./vendor/fonts/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./academy.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.js"}}</script>
+</head>
+<body>
+<a class="skip" href="#content">Перейти к содержимому</a>
+<header class="header"><a class="brand" href="#overview" aria-label="Neuroatlas, главная"><span class="brand-symbol"><svg class="ui-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="./vendor/icons.svg#network"></use></svg></span>NEURO<span>ATLAS</span></a><nav aria-label="Основная навигация"><a href="#overview">Обзор</a><a href="#curriculum">Программа</a><a href="#map">Карта 3D <span class="new-dot"></span></a><a href="#routes">Маршруты</a><a href="#schedule">Расписание</a><a href="#practice">Практика</a><a href="#resources">Ресурсы</a></nav><button id="motionPreference" class="motion-preference" aria-label="Уменьшить движение" aria-pressed="false" title="Уменьшить движение"><svg class="ui-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="./vendor/icons.svg#pause"></use></svg></button><button id="progressButton" class="progress-pill" title="Открыть изученные темы"><span class="status-dot"></span><span id="progressText">0 изучено</span></button></header>
+<main id="content" tabindex="-1"></main>
+<footer id="footer"><a class="brand" href="#overview"><svg class="ui-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="./vendor/icons.svg#network"></use></svg> NEUROATLAS</a><p>Понимать связи. Создавать интерфейсы.</p><span>Открытые материалы · Осознанная практика</span></footer>
+<dialog id="topicDialog" aria-labelledby="dialogTitle"><button class="dialog-close icon-btn" aria-label="Закрыть"><svg class="ui-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="./vendor/icons.svg#x"></use></svg></button><div id="dialogContent"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><p>Для интерактивной карты включите JavaScript. Открытые материалы: <a href="https://compneuro.neuromatch.io/">Neuromatch</a>, <a href="https://mne.tools/stable/auto_tutorials/index.html">MNE</a>.</p></noscript>
+<script type="module" src="./app.js"></script>
+</body></html>

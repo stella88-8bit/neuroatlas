@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {JSDOM} from 'jsdom';
+const dom=new JSDOM('<main><a class="field-card">A</a><a class="field-card">B</a></main>',{runScripts:'outside-only'}),w=dom.window,ctx=dom.getInternalVMContext(),animations=[];
+Object.assign(ctx,{animate:(target,properties)=>{const a={target,properties,cancelled:false,cancel(){this.cancelled=true;}};animations.push(a);return a;},createScope:()=>({add:fn=>fn(),revert(){}}),createTimeline(){},onScroll(){},svg:{},stagger(){},matchMedia:()=>({matches:true})});
+const source=fs.readFileSync(new URL('./dist/motion.js',import.meta.url),'utf8').replace(/^import .*\n/gm,'').replace('export const','const').replace('export function','function');vm.runInContext(source+';globalThis.mount=mountMotion;',ctx);
+const [a,b]=w.document.querySelectorAll('a');for(const el of [a,b])el.getBoundingClientRect=()=>({left:0,top:0,width:200,height:150});
+const cleanup=ctx.mount(w.document.querySelector('main'),false);
+a.dispatchEvent(new w.MouseEvent('pointermove',{bubbles:true,clientX:160,clientY:20}));
+a.dispatchEvent(new w.MouseEvent('pointerout',{bubbles:true,relatedTarget:b}));const reset=animations.at(-1);assert.equal(reset.properties.rotateX,0);
+b.dispatchEvent(new w.MouseEvent('pointermove',{bubbles:true,clientX:10,clientY:100}));assert(!reset.cancelled,'Card B must not cancel card A return animation');cleanup();assert(animations.at(-1).cancelled);assert(reset.cancelled);
+const count=animations.length;const reducedCleanup=ctx.mount(w.document.querySelector('main'),true);a.dispatchEvent(new w.MouseEvent('pointermove',{bubbles:true,clientX:100,clientY:10}));assert.equal(animations.length,count);reducedCleanup();w.close();
+console.log('PASS: independent hover return animations, cleanup and reduced-motion input handling.');

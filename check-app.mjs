@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {createRequire} from 'node:module';
+import * as planner from './dist/planner.js';
+const require=createRequire(import.meta.url);const {JSDOM}=require('jsdom');
+const data=JSON.parse(fs.readFileSync(new URL('./dist/data.json',import.meta.url)));
+const html=fs.readFileSync(new URL('./dist/index.html',import.meta.url),'utf8');
+const dom=new JSDOM(html,{url:'https://local.test/#curriculum',runScripts:'outside-only'}),w=dom.window,ctx=dom.getInternalVMContext();
+w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=function(){};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
+const graph={mount(){},suspend(){},setProgress(){},filter(){},select(){},focus(){},setReduced(){}};
+Object.assign(ctx,planner,{fetch:async url=>({ok:true,json:async()=>url==='./data.json'?data:{}}),TextEncoder,ResizeObserver:class{observe(){}},requestAnimationFrame:()=>1,cancelAnimationFrame(){},matchMedia:()=>({matches:true,addEventListener(){}}),animate:()=>({cancel(){},revert(){}}),mountMotion:()=>()=>{},storyMarkup:()=>'<section class="signal-story"></section>',createImmersion:()=>({exit(){},enter(){}}),graph});
+let academySource=fs.readFileSync(new URL('./dist/academy.js',import.meta.url),'utf8').replace(/^import .*\n/gm,'').replace('export function','function');vm.runInContext(academySource,ctx);
+const source=fs.readFileSync(new URL('./dist/app.js',import.meta.url),'utf8').replace(/^import .*\n/gm,'').replace("import('./graph.js')","Promise.resolve({createGraph:()=>graph})");
+await vm.runInContext(`(async()=>{${source};globalThis.appTest={render,renderMapPanel,getDone:()=>done};})()`,ctx);
+const $=s=>w.document.querySelector(s);assert.equal(w.document.querySelectorAll('.module-row').length,116);assert.equal($('.module-open').tagName,'A');assert.equal($('.module-open').getAttribute('href'),'#lesson?id=P0');
+$('#catalogSearch').value='Нейронаука речи';$('#catalogSearch').dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal(w.document.querySelectorAll('.module-row').length,1);assert($('.module-open').textContent.includes('Нейронаука речи'));
+$('#catalogSearch').value='';$('#catalogSearch').dispatchEvent(new w.Event('input',{bubbles:true}));$('[data-complete="P0"]').click();assert(ctx.appTest.getDone().has('P0'));assert.equal(JSON.parse(w.localStorage.getItem('neuroatlas-progress')).done[0],'P0');
+$('[data-topic="P0"]').click();assert($('dialog').open);assert($('dialog a[href="#lesson?id=P0"]'));$('.dialog-close').click();assert(!$('dialog').open);
+for(const route of ['overview','routes','practice','resources','map?id=C8']){w.history.replaceState({},'',`#${route}`);ctx.appTest.render();assert.equal(w.document.querySelectorAll('main h1').length,1,route);assert.equal(w.document.querySelectorAll('main a a,main button button,main button a').length,0,route);}
+assert($('#mapPanel a[href="#lesson?id=C8"]'));assert.equal($('#mapPanel a').tagName,'A');
+w.history.replaceState({},'','#routes');ctx.appTest.render();const trackButton=w.document.querySelectorAll('[data-track]')[1];const track=trackButton.dataset.track;trackButton.click();assert.equal(JSON.parse(w.localStorage.getItem('neuroatlas-plan')).track,track);
+$('.skip').click();assert.equal(w.location.hash,'#routes');assert.equal(w.document.activeElement.id,'content');
+w.history.replaceState({},'','#curriculum');ctx.appTest.render();$('#catalogStatus').value='ready';$('#catalogStatus').dispatchEvent(new w.Event('change',{bubbles:true}));assert(w.document.querySelectorAll('.module-row').length>0);assert(!$('main [data-complete="P0"]'));
+console.log('PASS: SPA navigation and headings, all 116 lecture links, live search, mastery persistence, module dialog, map-to-lecture link, route-to-plan selection and skip-link focus. DOM tests; rendering and GPU unverified.');
+w.close();
